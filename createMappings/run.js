@@ -12,4 +12,5 @@ process.on('message', async (data) => {
         }
         process.exit();
     }
+    //test
 })
