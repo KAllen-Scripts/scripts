@@ -1,0 +1,12 @@
+{
+    "displayText": "Second Test",
+    "parameters": [
+        {
+            "type": "text",
+            "required": true,
+            "ID": "channelNames",
+            "flavour": "Names of the channels you wish to do, seperated by a comma. Leave blank to do all"
+        }
+    ],
+    "explanation": "<ul>\\n\\t<li>test1</li>\\n\\t<li>test2</li>\\n</ul>\\n\\n<p>Test&nbsp;<strong>bold</strong></p>\\n"
+}
