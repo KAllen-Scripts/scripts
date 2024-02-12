@@ -1,8 +1,2 @@
-*.csv
-*.xlsx
-*.txt
 node_modules
-localOnly
-*/inputFolder/*
-*/outputFolder/*
 package-lock.json
