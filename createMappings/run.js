@@ -7,8 +7,12 @@ process.on('message', async (data) => {
     console.log(data)
     if(data.start){
         for(let i = 0; i<=100; i++){
-            if(i < 5){await sleep(1000)}
-            process.send({message:i})
+            await sleep(1000)
+            if(i % 2 == 0){
+                process.send({message:i})  
+            } else {
+                process.send({warning:i})
+            }
         }
         process.exit();
     }
