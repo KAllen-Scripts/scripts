@@ -42,7 +42,7 @@ async function startScript(){
 
         process.send({output: {
             name: location.replace(/[*?:\/[\]]/g, ''),
-            file: locations[location]
+            content: locations[location]
         }})
 
         // createSheet(workbook, location.replace(/[*?:\/[\]]/g, ''), locations[location])
