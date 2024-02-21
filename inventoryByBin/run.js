@@ -20,14 +20,14 @@ async function startScript(){
 
     let locations = {}
     await common.loopThrough('Getting Bins', `https://${global.enviroment}/v1/inventory-records`, 'size=1000', `[binId]!={UNASSIGNED}`, (record)=>{
-        if (!locations[record.locationName]){locations[record.locationName] = {}}
+        if (record.onHand == 0){return}
+        if (!locations[record.locationName]){locations[record.locationName] = []}
         if (!locations[record.locationName][record.itemSku]){locations[record.locationName][record.itemSku] = {
             itemId: record.itemId,
             name: record.itemName,
-            bins: {}
+            [`${record.binName} on Hand`]: record.onHand
         }}
-
-        locations[record.locationName][record.itemSku].bins[`${record.binName} on Hand`] = record.onHand      
+ 
     })
 
     for (const location in locations){
