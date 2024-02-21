@@ -16,14 +16,6 @@ process.on('message', async (data) => {
 })
 
 
-// function createSheet(workbook, sheetName, data) {
-//     const worksheet = workbook.addWorksheet(sheetName);
-
-//     let rows = convertToArrays(data);
-
-//     worksheet.addRows(rows);
-// }
-
 async function startScript(){
 
     let locations = {}
@@ -44,7 +36,5 @@ async function startScript(){
             name: location.replace(/[*?:\/[\]]/g, ''),
             content: locations[location]
         }})
-
-        // createSheet(workbook, location.replace(/[*?:\/[\]]/g, ''), locations[location])
     }
 }
