@@ -22,16 +22,15 @@ async function startScript(){
     await common.loopThrough('Getting Bins', `https://${global.enviroment}/v1/inventory-records`, 'size=1000', `[binId]!={UNASSIGNED}`, (record)=>{
         if (record.onHand == 0){return}
         if (!locations[record.locationName]){locations[record.locationName] = []}
-        if (!locations[record.locationName][record.itemSku]){locations[record.locationName][record.itemSku] = {
+        locations[record.locationName].push({
             itemId: record.itemId,
             name: record.itemName,
             [`${record.binName} on Hand`]: record.onHand
-        }}
+        })
  
     })
 
     for (const location in locations){
-
         process.send({output: {
             name: location.replace(/[*?:\/[\]]/g, ''),
             content: locations[location]
