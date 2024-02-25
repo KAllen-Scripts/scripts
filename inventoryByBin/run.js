@@ -1,8 +1,7 @@
 const common = require('../common.js')
 global.enviroment = 'api.stok.ly';
 
-process.on('message', async (data) => {
-    console.log(data)
+process.once('message', async (data) => {
     if(data.start){
         global.accessToken = data.accessToken
         await startScript()
@@ -31,9 +30,9 @@ async function startScript(){
     })
 
     for (const location in locations){
-        process.send({output: {
+        await common.awaitIPCRequest('output', {
             name: location.replace(/[*?:\/[\]]/g, ''),
             content: locations[location]
-        }})
+        })
     }
 }

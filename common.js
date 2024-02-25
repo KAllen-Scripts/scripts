@@ -1,5 +1,19 @@
-// modules
 const axios = require('axios');
+
+const pendingRequests = new Map();
+process.on('message', ({ response }) => {
+    if (response && pendingRequests.has(response.responseID)) {
+        const { resolve, reject } = pendingRequests.get(response.responseID);
+        if (response.passed) {
+            resolve(response);
+        } else {
+            reject(response.errorMessage);
+        }
+        pendingRequests.delete(response.responseID);
+    }
+});
+
+
 
 const sleep = (ms) => {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -22,7 +36,6 @@ const requester = async (method, url, data, attempt = 2, additionalHeaders, reAt
         await sleep(100)
     }
 
-
     return axios(sendRequest)
     
 }
@@ -37,23 +50,51 @@ async function loopThrough(message, url, params = '', filter = '', callBack, inc
             total = r.data.metadata.count
             return r.data
         })
-        var length = res.data.length
+        var pageLength = res.data.length
         if(incrementPage){page += 1}
         for (const item of res.data) {
-            // If we want to leave the function early, we can return false from the callback
             var continueLoop = await callBack(item)
             done += 1
-            if (message != '') {
-                process.send({message:`${message} ${done}/${total}`})
-            }
             if(continueLoop === false){return}
         }
-    } while (length > 0)
+        if (message != '') {
+            await awaitIPCRequest('message', `${message} ${done}/${total}`)
+        }
+    } while ((pageLength > 0) || (done < total))
 }
 
+
+function awaitIPCRequest(type, request) {
+    const requestID = generateUniqueID();
+    const message = { [type]: request, requestID };
+
+    return new Promise((resolve, reject) => {
+        pendingRequests.set(requestID, { resolve, reject });
+
+        process.send(message, (error) => {
+            if (error) {
+                console.log(error)
+                pendingRequests.delete(requestID);
+                reject(error);
+            }
+        });
+    });
+}
+
+
+function generateUniqueID(length = 24) {
+    const timestamp = Date.now().toString(36);
+    const randomString = Array.from({ length: length - timestamp.length }, () =>
+        Math.random().toString(36)[2]
+    ).join('');
+
+    return timestamp + randomString;
+}
 
 module.exports = {
     requester,
     sleep,
-    loopThrough
+    loopThrough,
+    awaitIPCRequest,
+    generateUniqueID
 };
