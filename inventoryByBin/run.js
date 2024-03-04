@@ -7,11 +7,6 @@ process.once('message', async (data) => {
         await startScript()
         process.exit();
     }
-
-    if(data.replenTokens){
-        global.tokens = data.replenTokens
-    }
-
 })
 
 

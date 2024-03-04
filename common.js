@@ -1,5 +1,3 @@
-const axios = require('axios');
-
 const pendingRequests = new Map();
 process.on('message', ({ response }) => {
     if (response && pendingRequests.has(response.responseID)) {
@@ -19,38 +17,18 @@ const sleep = (ms) => {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-const requester = async (method, url, data, attempt = 2, additionalHeaders, reAttempt = true) => {
-    let headers = additionalHeaders || {'Content-Type': 'application/json'};
-    headers.Authorization = 'Bearer ' + global.accessToken;
-    let sendRequest = {
-        method: method,
-        headers: headers,
+const requester = ({method, url, data, attempt = 2, additionalHeaders, reAttempt = true}) => {
+    let apiRequest = {
         url: url,
+        method: method,
         data: data,
-    };
-
-    global.tokens -= 1;
-    while (global.tokens <= 0) {
-        await sleep(100);
+        attempt: attempt,
+        additionalHeaders: additionalHeaders,
+        reAttempt: reAttempt
     }
-
-    try {
-        const response = await axios(sendRequest);
-        let logString = `Request successful: ${response.status} ${response.data.data}`;
-        console.log(logString);
-        return response;
-    } catch (error) {
-        let logString;
-        if (error.response) {
-            logString = `Request failed: ${error.response.status} ${error.response.statusText}`;
-        } else if (error.request) {
-            logString = "Request made but no response received";
-        } else {
-            logString = `Error setting up request: ${error.message}`;
-        }
-        console.log(logString);
-        throw error;
-    }
+    return awaitIPCRequest('apiRequest', apiRequest).then(r => {
+        return r.response
+    })   
 };
 
 
@@ -59,7 +37,7 @@ async function loopThrough(message, url, params = '', filter = '', callBack, inc
     let done = 0;
     let total
     do {
-        let res = await requester('get', `${url}?page=${page}&${params}&filter=${filter}`).then(r => {
+        let res = await requester({method: 'get', url: `${url}?page=${page}&${params}&filter=${filter}`}).then(r => {
             total = r.data.metadata.count
             return r.data
         })
